@@ -1,0 +1,77 @@
+;
+; nmk420.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=nmk420.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+nmk420_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+nmk420.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%nmk420.DeviceDesc%=nmk420_Device, Root\nmk420 ; TODO: edit hw-id
+
+[nmk420_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+nmk420.sys
+
+;-------------- Service installation
+[nmk420_Device.NT.Services]
+AddService = nmk420,%SPSVCINST_ASSOCSERVICE%, nmk420_Service_Inst
+
+; -------------- nmk420 driver install sections
+[nmk420_Service_Inst]
+DisplayName    = %nmk420.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\nmk420.sys
+
+;
+;--- nmk420_Device Coinstaller installation ------
+;
+
+[nmk420_Device.NT.CoInstallers]
+AddReg=nmk420_Device_CoInstaller_AddReg
+CopyFiles=nmk420_Device_CoInstaller_CopyFiles
+
+[nmk420_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[nmk420_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[nmk420_Device.NT.Wdf]
+KmdfService =  nmk420, nmk420_wdfsect
+[nmk420_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "nmk420 Installation Disk"
+nmk420.DeviceDesc = "nmk420 Device"
+nmk420.SVCDESC = "nmk420 Service"
